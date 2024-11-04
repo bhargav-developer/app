@@ -5,9 +5,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { FaPlus } from "react-icons/fa";
 import { ADD_TODO, DELETE_TODO, GET_TODOS, UPDATE_TODO } from '@/lib/constrations';
 import { IoFilter } from "react-icons/io5";
+import { data } from 'autoprefixer';
 
 function Home() {
   const [todo, setTodo] = useState("")
+  const [allTodos,setAlltodos] = useState([])
   const [todos, setTodos] = useState([])
   const [loading, setLoading] = useState(true)
   const [showCompleted, setShowCompleted] = useState(false)
@@ -19,45 +21,55 @@ function Home() {
 
 
   useEffect(() => {
+
+
+    const getAllTodos = async () => {
+      try {
+        const res = await axios.get(GET_TODOS)
+        const data = await res.data
+        setAlltodos(data)
+      } catch (error) {
+        console.log(error)
+      }
+      setLoading(false)
+    }
+    getAllTodos()
     renderTasks()
 
-  }, [showCompleted, axios])
-
+  },[loading])
 
   useEffect(() => {
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        addTask()
-      }
-    })
-  
-  }, [todo])
+  renderTasks()
+  }, [showCompleted])
   
 
-  const renderTasks = async () => {
-    try {
-      const res = await axios.get(GET_TODOS);
-      const data = res.data;
-      const uncompleted = data.filter(e => e.Iscompleted === false)
-      if (!showCompleted) {
-        setTodos(uncompleted)
-      }
-      else {
-        setTodos(data)
-      }
-
-    } catch (error) {
-      console.log(error)
+  const renderTasks = () => {
+    const unCompletedTasks = allTodos.filter(todo => todo.Iscompleted != true);
+    if(!showCompleted){
+      setTodos(unCompletedTasks)
+      console.log(unCompletedTasks)
     }
-    finally {
-      setLoading(false)
+    else{
+      setTodos(allTodos)
+      console.log(allTodos)
     }
   }
 
 
+const handleKeyPress = (e) => {
+  if(e.key === "Enter"){
+  addTask()
+  }
+}
+
+
+
+
+
+
   const handleChange = (e) => {
     setTodo(e.target.value)
-   
+
   }
 
 
@@ -97,9 +109,10 @@ function Home() {
       })
       setTodos(filterOut)
       const res = await axios.post(UPDATE_TODO, { id })
-      if (res.status === 200) {
-        renderTasks()
+      if (!res.status === 200) {
+        alert("There is an error while updating the task")
       }
+      renderTasks()
     } catch (error) {
       console.log(error)
     }
@@ -120,7 +133,6 @@ function Home() {
       setTodo("")
       try {
         const res = await axios.post(ADD_TODO, data)
-        renderTasks()
       }
       catch (err) {
         console.log("Error is ", err)
@@ -140,7 +152,7 @@ function Home() {
             <h1 className='text-center text-4xl mx-3 my-4 text-my-black font-bold '>Add Your Todo</h1>
             <div className="flex items-center  justify-center">
               <div className="flex items-center space-x-4 flex-col gap-3 sm:flex-row  p-4 w-full justify-center rounded shadow-md">
-                <input onChange={handleChange} value={todo} type="text" placeholder="Enter Your Todo List" className="border w-full border-gray-300 rounded-lg ml-4 px-6 py-2 focus:outline-none " />
+                <input onChange={handleChange}   onKeyDown={handleKeyPress} value={todo} type="text" placeholder="Enter Your Todo List" className="border w-full border-gray-300 rounded-lg ml-4 px-6 py-2 focus:outline-none " />
                 <DropdownMenu className="bg-black text-white rounded-lg">
                   <DropdownMenuTrigger className='bg-my-brown w-[100%] sm:w-[20%] p-3 text-white  rounded-lg focus:outline-none '>{category ? `${category}` : "Catergory"} </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-black p-2 text-white">
@@ -151,7 +163,7 @@ function Home() {
                     <DropdownMenuSeparator />
                     {categories.map((e) => {
                       return <div key={e}>
-                        <DropdownMenuItem  onClick={() => setCategory(e)} className="cursor-pointer" >{e}</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setCategory(e)} className="cursor-pointer" >{e}</DropdownMenuItem>
                       </div>
                     })}
                   </DropdownMenuContent>
@@ -170,9 +182,9 @@ function Home() {
             </div>
           </div>
           {loading ? <div className='text-4xl text-center p-5'>Loading...</div> : todos.length === 0 ? <h1 className='text-4xl text-center p-5'>No Tasks </h1> :
-            <div className="container overflow-auto mx-auto p-4 ">
+            <div className="container  mx-auto p-4 flex   items-start justify-center ">
 
-              <table className="w-full border-collapse bg-white shadow-md rounded">
+              <table className="w-full border-collapse  bg-white shadow-md rounded">
                 <thead>
                   <tr className="bg-my-skin  border-b">
                     <th className="p-2">Status</th>
@@ -186,15 +198,15 @@ function Home() {
 
                   {todos.map(task => (
 
-                    <tr key={task.id} className="border-b">
+                    <tr key={task.id} className="border-b ">
                       <td className="p-2 text-center">
                         <input type="checkbox" className='' checked={task.Iscompleted} onChange={() => checkCompleted(task.id)} name="" id="" />
                       </td>
-                      <td className={task.Iscompleted ? "line-through text-gray-700 text-2xl w-4/5 p-2 text-center" : "text-2xl p-2 text-center w-4/5"}>{task.todo}</td>
+                      <td className={task.Iscompleted ? "line-through text-gray-700 text-sm sm:text-2xl w-4/5 p-2 text-center" : "text-sm p-2 text-center sm:text-2xl w-4/5"}>{task.todo}</td>
                       <td className="text-purple-600 text-center">{task.category}</td>
                       <td className="p-2 text-center">
                         <button
-                          className="bg-my-red text-white py-1 px-3 rounded"
+                          className="bg-my-red text-white py-1 px-1  sm:px-3 rounded"
                           onClick={() => editTask(task.id)}
                         >
                           Edit
@@ -202,7 +214,7 @@ function Home() {
                       </td>
                       <td className="p-2 text-center">
                         <button
-                          className="bg-my-red text-white py-1 px-3 rounded"
+                          className="bg-my-red text-white py-1 px-1 sm:px-3 rounded"
                           onClick={() => deleteTask(task.id)}
                         >
                           Delete
