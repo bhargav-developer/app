@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:4000/api/to-do"
+const BASE_URL = "https://todo-oaq7.onrender.com/api/to-do"
 
 export const ADD_TODO = `${BASE_URL}/add-todo`
 export const GET_TODOS = `${BASE_URL}/get-todos`

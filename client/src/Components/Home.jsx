@@ -20,22 +20,31 @@ function Home() {
 
   useEffect(() => {
     renderTasks()
-  }, [showCompleted,axios])
 
+  }, [showCompleted, axios])
+
+
+  useEffect(() => {
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        addTask()
+      }
+    })
+  
+  }, [todo])
+  
 
   const renderTasks = async () => {
     try {
       const res = await axios.get(GET_TODOS);
-      const data =  res.data;
+      const data = res.data;
       const uncompleted = data.filter(e => e.Iscompleted === false)
       if (!showCompleted) {
         setTodos(uncompleted)
       }
-      else{
+      else {
         setTodos(data)
       }
-      
-
 
     } catch (error) {
       console.log(error)
@@ -45,18 +54,22 @@ function Home() {
     }
   }
 
+
   const handleChange = (e) => {
     setTodo(e.target.value)
+   
   }
 
 
   const deleteTask = async (id) => {
     try {
+      const filterOut = todos.filter(task => {
+        if (task.id !== id) {
+          return task
+        }
+      })
+      setTodos(filterOut)
       const res = await axios.post(DELETE_TODO, { id })
-      if (res.status === 200) {
-        renderTasks()
-      }
-
 
     }
     catch (err) {
@@ -74,12 +87,18 @@ function Home() {
 
   }
   const checkCompleted = async (id) => {
+
     try {
+      const filterOut = todos.filter((task) => {
+        if (task.id === id) {
+          task.Iscompleted = !task.Iscompleted
+        }
+        return task
+      })
+      setTodos(filterOut)
       const res = await axios.post(UPDATE_TODO, { id })
-      console.log("lol")
       if (res.status === 200) {
         renderTasks()
-     
       }
     } catch (error) {
       console.log(error)
@@ -97,9 +116,10 @@ function Home() {
     if (todo !== "") {
       const task_id = uniqid()
       const data = { id: task_id, todo, category, Iscompleted: false }
+      setTodos([...todos, data])
+      setTodo("")
       try {
         const res = await axios.post(ADD_TODO, data)
-        setTodo("")
         renderTasks()
       }
       catch (err) {
@@ -121,17 +141,17 @@ function Home() {
             <div className="flex items-center  justify-center">
               <div className="flex items-center space-x-4 flex-col gap-3 sm:flex-row  p-4 w-full justify-center rounded shadow-md">
                 <input onChange={handleChange} value={todo} type="text" placeholder="Enter Your Todo List" className="border w-full border-gray-300 rounded-lg ml-4 px-6 py-2 focus:outline-none " />
-                <DropdownMenu className="bg-black text-white  rounded-lg">
+                <DropdownMenu className="bg-black text-white rounded-lg">
                   <DropdownMenuTrigger className='bg-my-brown w-[100%] sm:w-[20%] p-3 text-white  rounded-lg focus:outline-none '>{category ? `${category}` : "Catergory"} </DropdownMenuTrigger>
-                  <DropdownMenuContent key={""} className="bg-black text-white">
+                  <DropdownMenuContent className="bg-black p-2 text-white">
                     <DropdownMenuLabel onClick={() => setCategory(undefined)} ><div className="flex justify-between items-center sm:w-[100%]" >
                       Add category
                       <FaPlus />
                     </div> </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {categories.map((e) => {
-                      return <div >
-                        <DropdownMenuItem key={e} onClick={() => setCategory(e)} className="cursor-pointer" >{e}</DropdownMenuItem>
+                      return <div key={e}>
+                        <DropdownMenuItem  onClick={() => setCategory(e)} className="cursor-pointer" >{e}</DropdownMenuItem>
                       </div>
                     })}
                   </DropdownMenuContent>
@@ -143,15 +163,15 @@ function Home() {
             </div>
           </div>
           <div className='flex justify-between p-3'>
-                <div className='inline-flex basis-[10%] justify-around items-center'><IoFilter /> Filter</div>
-                <div className='inline-flex sm:basis-[15%] basis-[60%] justify-between items-center'>
-                  <input type="checkbox" onChange={() => setShowCompleted(!showCompleted)} checked={showCompleted} name="completed" id="" />
-                  <label htmlFor="completed" className=''>Show Completed</label>
-                </div>
-              </div>
+            <div className='inline-flex basis-[10%] justify-around items-center'><IoFilter /> Filter</div>
+            <div className='inline-flex sm:basis-[15%] justify-between items-center'>
+              <input type="checkbox" onChange={() => setShowCompleted(!showCompleted)} checked={showCompleted} name="completed" id="" />
+              <label htmlFor="completed" className=''>Show Completed</label>
+            </div>
+          </div>
           {loading ? <div className='text-4xl text-center p-5'>Loading...</div> : todos.length === 0 ? <h1 className='text-4xl text-center p-5'>No Tasks </h1> :
-            <div className="container mx-auto p-4 ">
-            
+            <div className="container overflow-auto mx-auto p-4 ">
+
               <table className="w-full border-collapse bg-white shadow-md rounded">
                 <thead>
                   <tr className="bg-my-skin  border-b">
@@ -165,8 +185,8 @@ function Home() {
                 <tbody>
 
                   {todos.map(task => (
-                   
-                    <tr key={task._id} className="border-b">
+
+                    <tr key={task.id} className="border-b">
                       <td className="p-2 text-center">
                         <input type="checkbox" className='' checked={task.Iscompleted} onChange={() => checkCompleted(task.id)} name="" id="" />
                       </td>
