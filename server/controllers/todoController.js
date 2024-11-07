@@ -3,8 +3,10 @@ import { todo_lists } from "../Schema/Schema.js";
 
 export const get_todo_list = async (req, res) => {
     try {
-        const DB = await todo_lists.find({});
-        res.json(DB)
+        const id = req.user._id;
+        console.log(id)
+
+
     }
     catch (err) {
         console.log(err)
@@ -48,7 +50,7 @@ export const update_todo = async (req, res) => {
             $set: { Iscompleted: !todoItem.Iscompleted }
         }, { new: true })
         console.log(update)
-        res.json({"Updated ":update})
+        res.json({ "Updated ": update })
 
     } catch (error) {
         console.log(error)

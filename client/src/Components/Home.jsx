@@ -25,7 +25,7 @@ function Home() {
 
     const getAllTodos = async () => {
       try {
-        const res = await axios.get(GET_TODOS)
+        const res = await axios.get(GET_TODOS,{withCredentials: true})
         const data = await res.data
         setAlltodos(data)
       } catch (error) {
