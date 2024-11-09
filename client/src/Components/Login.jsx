@@ -1,4 +1,5 @@
 import { lOGIN, SIGN_IN } from '@/lib/constrations'
+import { useAppStore } from '@/lib/store'
 import axios from 'axios'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -7,6 +8,7 @@ const Login = () => {
   const Navigate = useNavigate()
   const [email, setemail] = useState("")
   const [password, setPassword] = useState("")
+  const { setUserInfo } = useAppStore()
 
 
   const handleEmail = (e) => { setemail(e.target.value) }
@@ -14,9 +16,10 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    const res = await axios.post(lOGIN, { email, password },{withCredentials: true})
+    const res = await axios.post(lOGIN, { email, password }, { withCredentials: true })
     console.log(res)
-    if(res.status === 200){
+    if (res.status === 200) {
+      setUserInfo(res.data.user)
       Navigate("/home")
     }
   }

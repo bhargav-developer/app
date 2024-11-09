@@ -6,10 +6,12 @@ import { FaPlus } from "react-icons/fa";
 import { ADD_TODO, DELETE_TODO, GET_TODOS, UPDATE_TODO } from '@/lib/constrations';
 import { IoFilter } from "react-icons/io5";
 import { data } from 'autoprefixer';
+import { useAppStore } from '@/lib/store';
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
   const [todo, setTodo] = useState("")
-  const [allTodos,setAlltodos] = useState([])
+  const [allTodos, setAlltodos] = useState([])
   const [todos, setTodos] = useState([])
   const [loading, setLoading] = useState(true)
   const [showCompleted, setShowCompleted] = useState(false)
@@ -18,16 +20,24 @@ function Home() {
     "work",
     "personal"
   ])
-
+  const { userInfo } = useAppStore()
+  const naviagate = useNavigate()
 
   useEffect(() => {
+    if (!userInfo) {
+      naviagate("/login")
+
+    }
 
 
     const getAllTodos = async () => {
       try {
-        const res = await axios.get(GET_TODOS,{withCredentials: true})
+        const res = await axios.get(GET_TODOS, { withCredentials: true })
         const data = await res.data
-        setAlltodos(data)
+        console.log("data = ",data.data)
+        if(data.data){
+          setAlltodos(data.data)
+        }
       } catch (error) {
         console.log(error)
       }
@@ -36,31 +46,31 @@ function Home() {
     getAllTodos()
     renderTasks()
 
-  },[loading])
+  }, [])
 
   useEffect(() => {
-  renderTasks()
-  }, [showCompleted])
-  
+    renderTasks()
+  }, [showCompleted,loading])
 
-  const renderTasks = () => {
+
+  const renderTasks =  () => {
     const unCompletedTasks = allTodos.filter(todo => todo.Iscompleted != true);
-    if(!showCompleted){
+    if (!showCompleted) {
       setTodos(unCompletedTasks)
       console.log(unCompletedTasks)
     }
-    else{
+    else {
       setTodos(allTodos)
       console.log(allTodos)
     }
   }
 
 
-const handleKeyPress = (e) => {
-  if(e.key === "Enter"){
-  addTask()
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      addTask()
+    }
   }
-}
 
 
 
@@ -81,7 +91,9 @@ const handleKeyPress = (e) => {
         }
       })
       setTodos(filterOut)
-      const res = await axios.post(DELETE_TODO, { id })
+      console.log(filterOut)
+      const res = await axios.post(DELETE_TODO,{id})
+      console.log(res)
 
     }
     catch (err) {
@@ -128,11 +140,11 @@ const handleKeyPress = (e) => {
     }
     if (todo !== "") {
       const task_id = uniqid()
-      const data = { id: task_id, todo, category, Iscompleted: false }
+      const data = { id: task_id, todo, category, Iscompleted: false, createdBy: userInfo._id }
       setTodos([...todos, data])
       setTodo("")
       try {
-        const res = await axios.post(ADD_TODO, data)
+        const res = await axios.post(ADD_TODO, data,{withCredentials: true})
       }
       catch (err) {
         console.log("Error is ", err)
@@ -152,7 +164,7 @@ const handleKeyPress = (e) => {
             <h1 className='text-center text-4xl mx-3 my-4 text-my-black font-bold '>Add Your Todo</h1>
             <div className="flex items-center  justify-center">
               <div className="flex items-center space-x-4 flex-col gap-3 sm:flex-row  p-4 w-full justify-center rounded shadow-md">
-                <input onChange={handleChange}   onKeyDown={handleKeyPress} value={todo} type="text" placeholder="Enter Your Todo List" className="border w-full border-gray-300 rounded-lg ml-4 px-6 py-2 focus:outline-none " />
+                <input onChange={handleChange} onKeyDown={handleKeyPress} value={todo} type="text" placeholder="Enter Your Todo List" className="border w-full border-gray-300 rounded-lg ml-4 px-6 py-2 focus:outline-none " />
                 <DropdownMenu className="bg-black text-white rounded-lg">
                   <DropdownMenuTrigger className='bg-my-brown w-[100%] sm:w-[20%] p-3 text-white  rounded-lg focus:outline-none '>{category ? `${category}` : "Catergory"} </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-black p-2 text-white">

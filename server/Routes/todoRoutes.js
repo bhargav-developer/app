@@ -6,7 +6,7 @@ const routes = Router()
 
 routes.get("/get-todos",verifyUser,get_todo_list)
 routes.post("/add-todo",verifyUser,add_todo_list)
-routes.post("/delete-todo",verifyUser,delete_todo_list)
+routes.post("/delete-todo",delete_todo_list)
 routes.post("/update-todo",verifyUser,update_todo)
 
 

@@ -5,7 +5,6 @@ import { getUser, setUser } from "../services/auth.js";
 const signIn = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        console.log(req.body)
         const createUser = await users.create({ name, email, password });
         return res.json({ user: createUser })
     } catch (error) {
