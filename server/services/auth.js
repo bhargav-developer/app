@@ -1,11 +1,16 @@
-const UsersMap = new Map();
+import jwt from "jsonwebtoken";
 
-const setUser =  (id,user) => {
-    UsersMap.set(id,user)
+const secretKey = "Bhargav@200"
+
+const setUser =  (user) => {
+    return jwt.sign({
+        id: user.id,
+        email: user.email
+    },secretKey)
 }
 
-const getUser = (id) => {
-    return UsersMap.get(id);
+const getUser = (token) => {
+    return jwt.verify(token,secretKey)
 }
 
 export {setUser,getUser}

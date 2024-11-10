@@ -20,9 +20,8 @@ const login = async (req, res) => {
     if (!user) {
         return res.send("User Not Found")
     }
-    const UID = uuid()
-    res.cookie("uid", UID)
-    setUser(UID, user)
+    const token = setUser(user)
+    res.cookie("uid", token)
     return res.json({ user })
 }
 

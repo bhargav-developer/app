@@ -24,10 +24,6 @@ function Home() {
   const naviagate = useNavigate()
 
   useEffect(() => {
-    if (!userInfo) {
-      naviagate("/login")
-
-    }
 
 
     const getAllTodos = async () => {
@@ -92,7 +88,7 @@ function Home() {
       })
       setTodos(filterOut)
       console.log(filterOut)
-      const res = await axios.post(DELETE_TODO,{id})
+      const res = await axios.post(DELETE_TODO,{id},{withCredentials: true})
       console.log(res)
 
     }
@@ -120,7 +116,7 @@ function Home() {
         return task
       })
       setTodos(filterOut)
-      const res = await axios.post(UPDATE_TODO, { id })
+      const res = await axios.post("http://localhost:4000/api/to-do/update-todo",{id},{withCredentials: true})
       if (!res.status === 200) {
         alert("There is an error while updating the task")
       }
@@ -140,7 +136,7 @@ function Home() {
     }
     if (todo !== "") {
       const task_id = uniqid()
-      const data = { id: task_id, todo, category, Iscompleted: false, createdBy: userInfo._id }
+      const data = { id: task_id, todo, category, Iscompleted: false}
       setTodos([...todos, data])
       setTodo("")
       try {
