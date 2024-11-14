@@ -30,18 +30,19 @@ function Home() {
       try {
         const res = await axios.get(GET_TODOS, { withCredentials: true })
         const data = await res.data
-        console.log("data = ",data.data)
-        if(data.data){
-          setAlltodos(data.data)
+        console.log(res)
+        if(data){
+          setAlltodos(data)
         }
       } catch (error) {
+        if(error.status === 404){
+          naviagate("/login")
+        }
         console.log(error)
       }
       setLoading(false)
     }
     getAllTodos()
-    renderTasks()
-
   }, [])
 
   useEffect(() => {
@@ -53,11 +54,9 @@ function Home() {
     const unCompletedTasks = allTodos.filter(todo => todo.Iscompleted != true);
     if (!showCompleted) {
       setTodos(unCompletedTasks)
-      console.log(unCompletedTasks)
     }
     else {
       setTodos(allTodos)
-      console.log(allTodos)
     }
   }
 
@@ -89,7 +88,9 @@ function Home() {
       setTodos(filterOut)
       console.log(filterOut)
       const res = await axios.post(DELETE_TODO,{id},{withCredentials: true})
-      console.log(res)
+      if(!res.status === 200){
+        alert("there was an Error While deleting the todo")
+      }
 
     }
     catch (err) {

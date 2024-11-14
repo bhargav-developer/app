@@ -8,7 +8,7 @@ export const get_todo_list = async (req, res) => {
         console.log(id)
         const data = await todo_lists.find({createdBy: id});
         if(data){
-            return res.json({data})
+            return res.json(data)
         }
 
     }
@@ -54,7 +54,7 @@ export const update_todo = async (req, res) => {
         const update = await todo_lists.findOneAndUpdate({ id }, {
             $set: { Iscompleted: !todoItem.Iscompleted }
         }, { new: true })
-        console.log(update)
+
         res.json({ "Updated ": update })
 
     } catch (error) {
